@@ -1,6 +1,11 @@
-import { View } from 'react-native';
-
-import { styles } from './styles';
+import { useEffect } from "react";
+import { View } from "react-native";
+import { styles } from "./styles";
+import Animated, {
+  useAnimatedStyle,
+  useSharedValue,
+  withTiming,
+} from "react-native-reanimated";
 
 interface Props {
   total: number;
@@ -10,9 +15,20 @@ interface Props {
 export function ProgressBar({ total, current }: Props) {
   const percentage = Math.round((current / total) * 100);
 
+  const sharedProgress = useSharedValue(percentage);
+
+  const AnimatedStyle = useAnimatedStyle(() => {
+    return {
+      width: `${sharedProgress.value}%`,
+    };
+  });
+
+  useEffect(() => {
+    sharedProgress.value = withTiming(percentage);
+  }, [current]);
   return (
     <View style={styles.track}>
-      <View style={[styles.progress, { width: `${percentage}%` }]} />
+      <Animated.View style={[styles.progress, AnimatedStyle]} />
     </View>
   );
 }

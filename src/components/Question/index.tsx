@@ -1,36 +1,64 @@
-import { View, Text } from 'react-native';
+import { Text, Dimensions } from "react-native";
+import Animated, { Keyframe } from "react-native-reanimated";
 
-import { Option } from '../Option';
-import { styles } from './styles';
+import { Option } from "../Option";
+import { styles } from "./styles";
 
 type QuestionProps = {
   title: string;
   alternatives: string[];
-}
+};
 
 type Props = {
   question: QuestionProps;
   alternativeSelected?: number | null;
   setAlternativeSelected?: (value: number) => void;
-}
+};
 
-export function Question({ question, alternativeSelected, setAlternativeSelected }: Props) {
+const SCREEN_WIDTH = Dimensions.get("window").width; // Tamanho da tela do dispositivo, largura da tela.
+
+export function Question({
+  question,
+  alternativeSelected,
+  setAlternativeSelected,
+}: Props) {
+  const enteringKeyframe = new Keyframe({
+    0: {
+      opacity: 0,
+      transform: [{ translateX: SCREEN_WIDTH }, { rotate: "90deg" }],
+    },
+    70: {
+      opacity: 0.3,
+    },
+    100: { opacity: 1, transform: [{ translateX: 0 }, { rotate: "0deg" }] },
+  });
+
+  const exitingKeyframe = new Keyframe({
+    from: { opacity: 0, transform: [{ translateX: 0 }, { rotate: "0deg" }] },
+    to: {
+      opacity: 1,
+      transform: [{ translateX: SCREEN_WIDTH * -1 }, { rotate: "-90deg" }],
+    },
+  });
+
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>
-        {question.title}
-      </Text>
+    <Animated.View
+      style={styles.container}
+      entering={enteringKeyframe.duration(500)}
+      exiting={exitingKeyframe.duration(500)}
+    >
+      <Text style={styles.title}>{question.title}</Text>
 
-      {
-        question.alternatives.map((alternative, index) => (
-          <Option
-            key={index}
-            title={alternative}
-            checked={alternativeSelected === index}
-            onPress={() => setAlternativeSelected && setAlternativeSelected(index)}
-          />
-        ))
-      }
-    </View>
+      {question.alternatives.map((alternative, index) => (
+        <Option
+          key={index}
+          title={alternative}
+          checked={alternativeSelected === index}
+          onPress={() =>
+            setAlternativeSelected && setAlternativeSelected(index)
+          }
+        />
+      ))}
+    </Animated.View>
   );
 }
