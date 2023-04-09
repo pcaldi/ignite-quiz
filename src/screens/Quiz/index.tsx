@@ -161,6 +161,12 @@ export function Quiz() {
     };
   });
 
+  const headerStyles = useAnimatedStyle(() => {
+    return {
+      opacity: interpolate(scrollY.value, [50, 90], [1, 0], Extrapolate.CLAMP),
+    };
+  });
+
   useEffect(() => {
     const quizSelected = QUIZ.filter((item) => item.id === id)[0];
     setQuiz(quizSelected);
@@ -188,11 +194,13 @@ export function Quiz() {
         onScroll={scrollHandler}
         scrollEventThrottle={16} // Suaviza o scroll no ios.
       >
-        <QuizHeader
-          title={quiz.title}
-          currentQuestion={currentQuestion + 1}
-          totalOfQuestions={quiz.questions.length}
-        />
+        <Animated.View style={[styles.header, headerStyles]}>
+          <QuizHeader
+            title={quiz.title}
+            currentQuestion={currentQuestion + 1}
+            totalOfQuestions={quiz.questions.length}
+          />
+        </Animated.View>
         <Animated.View style={shakeAnimatedStyle}>
           <Question
             key={quiz.questions[currentQuestion].title}
