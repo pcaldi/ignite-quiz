@@ -13,7 +13,9 @@ import { Loading } from "../../components/Loading";
 import { Question } from "../../components/Question";
 import { QuizHeader } from "../../components/QuizHeader";
 import { ConfirmButton } from "../../components/ConfirmButton";
+import { ProgressBar } from "../../components/ProgressBar";
 import { OutlineButton } from "../../components/OutlineButton";
+
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
@@ -24,7 +26,7 @@ import Animated, {
   useAnimatedScrollHandler,
   Extrapolate,
 } from "react-native-reanimated";
-import { ProgressBar } from "../../components/ProgressBar";
+import { GestureDetector, Gesture } from "react-native-gesture-handler";
 
 interface Params {
   id: string;
@@ -47,8 +49,8 @@ export function Quiz() {
   const { id } = route.params as Params;
 
   const shake = useSharedValue(0);
-
   const scrollY = useSharedValue(0);
+  const cardPosition = useSharedValue(0);
 
   function handleSkipConfirm() {
     Alert.alert("Pular", "Deseja realmente pular a questão?", [
@@ -167,6 +169,14 @@ export function Quiz() {
     };
   });
 
+  const onPan = Gesture.Pan() // Pan é o gesto de arrastar a tela do device.
+    .onUpdate((event) => {
+      cardPosition.value = event.translationX;
+    })
+    .onEnd(() => {
+      cardPosition.value = withTiming(0); // withTiming deixa o movimento mais suave.
+    });
+
   useEffect(() => {
     const quizSelected = QUIZ.filter((item) => item.id === id)[0];
     setQuiz(quizSelected);
@@ -201,14 +211,16 @@ export function Quiz() {
             totalOfQuestions={quiz.questions.length}
           />
         </Animated.View>
-        <Animated.View style={shakeAnimatedStyle}>
-          <Question
-            key={quiz.questions[currentQuestion].title}
-            question={quiz.questions[currentQuestion]}
-            alternativeSelected={alternativeSelected}
-            setAlternativeSelected={setAlternativeSelected}
-          />
-        </Animated.View>
+        <GestureDetector gesture={onPan}>
+          <Animated.View style={shakeAnimatedStyle}>
+            <Question
+              key={quiz.questions[currentQuestion].title}
+              question={quiz.questions[currentQuestion]}
+              alternativeSelected={alternativeSelected}
+              setAlternativeSelected={setAlternativeSelected}
+            />
+          </Animated.View>
+        </GestureDetector>
         <View style={styles.footer}>
           <OutlineButton title="Parar" onPress={handleStop} />
           <ConfirmButton onPress={handleConfirm} />
