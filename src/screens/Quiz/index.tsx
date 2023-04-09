@@ -174,6 +174,7 @@ export function Quiz() {
   });
 
   const onPan = Gesture.Pan() // Pan é o gesto de arrastar a tela do device.
+    .activateAfterLongPress(200) // Ativa o gesto de long press.
     .onUpdate((event) => {
       const moveToLeft = event.translationX < 0; // Quando o movimento é para esquerda é negativo, e para direita positivo.
 
